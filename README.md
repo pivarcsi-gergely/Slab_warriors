@@ -1,2 +1,2 @@
-# Slab_warriors
-The GitHub repository to our project's desktop application, called Slab Warriors.
+# Very early days
+However, expect daily commits
