@@ -1,62 +1,157 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
-using SimpleJSON;
-using UnityEngine.UI;
-using TMPro;
 using System;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using UnityUITable;
 
-public class ApiController: MonoBehaviour
+public class ApiController : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI idField, usernameField, bannedField;
-    [SerializeField] TextMeshProUGUI[] usersArray;
-    private readonly string baseUrl = "http://127.0.0.1:8000/api/users";
+    private readonly static string baseUrl = "http://127.0.0.1:8000/api/users";
+    [SerializeField] Table table;
 
 
-    private void Start()
+    [ContextMenu("Test Get")]
+    public async void testGet()
     {
-        idField.text = usernameField.text = bannedField.text = "";
+        using var www = UnityWebRequest.Get(baseUrl + "/1");
 
-        foreach (TextMeshProUGUI user in usersArray)
+        www.SetRequestHeader("Content-Type", "application/json");
+
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
         {
-            user.text = "";
-        }
-        
-        StartCoroutine(GetJsonData(1));
-    }
-
-    IEnumerator GetJsonData(int id)
-    {
-        UnityWebRequest unityReq = UnityWebRequest.Get(baseUrl + "/" + id);
-
-        yield return unityReq.SendWebRequest();
-
-        if (unityReq.result == UnityWebRequest.Result.ProtocolError
-            || unityReq.result == UnityWebRequest.Result.ConnectionError)
-        {
-            Debug.LogError(unityReq.error);
-            yield break;
+            await Task.Yield();
         }
 
-        JSONNode userInfo = JSON.Parse("{\"users\":" + unityReq.downloadHandler.text + "}");
+        var jsonResponse = www.downloadHandler.text;
 
-        User[] users = new User[10];
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Success: {www.downloadHandler.text}");
+        }
+        else
+        {
+            Debug.Log($"Failed: {www.error}");
+        }
 
-            users[0] = new User(userInfo["id"], userInfo["username"], userInfo["email"], userInfo["email_verified_at"],
-                userInfo["account_number"], userInfo["card_count"], userInfo["fighter_count"], userInfo["level"], userInfo["admin"], userInfo["banned"]);
-        
+        try
+        {
+            var result = JsonConvert.DeserializeObject<User>(jsonResponse);
+        }
+        catch (Exception ex)
+        {
 
-        Debug.Log(userInfo["id"]);
+            Debug.LogError(ex.Message);
+        }
     }
 
-    /* Példányosítás, User osztályként*/
 
-    /*public static User getNewUser()
+    public async void UserGet()
     {
-        HttpWebRequest request = (HttpWebRequest)WebRequest.Create();
-        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-        StreamReader sr = new StreamReader(response.GetResponseStream());
-        string jsonString = sr.ReadToEnd();
-        return JsonUtility.FromJson<User>(jsonString);
-    }*/
+        using var www = UnityWebRequest.Get(baseUrl + "1");
+        www.SetRequestHeader("Content-Type", "application/json");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        var jsonResponse = www.downloadHandler.text;
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Success: {www.downloadHandler.text}");
+        }
+        else
+        {
+            Debug.Log($"Failed: {www.error}");
+        }
+
+        try
+        {
+            var result = JsonConvert.DeserializeObject<User>(jsonResponse);
+        }
+        catch (Exception ex)
+        {
+
+            Debug.LogError(ex.Message);
+        }
+    }
+
+    public async void UsersGet(IList<User> usersList)
+    {
+
+        using var www = UnityWebRequest.Get(baseUrl);
+        www.SetRequestHeader("Content-Type", "application/json");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        var jsonResponse = www.downloadHandler.text;
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Success: {www.downloadHandler.text}");
+        }
+        else
+        {
+            Debug.Log(www.downloadHandler.text);
+            Debug.Log($"Failed: {www.error}");
+        }
+        
+        try
+        {
+            usersList = DeserializeToList<User>(jsonResponse, usersList);
+            table.UpdateContent();
+            foreach (var user in usersList)
+            {
+                Debug.Log(user.banned);
+            }
+        }
+        catch (Exception ex)
+        {
+
+            Debug.LogError(ex.Message);
+        }
+    }
+
+    public static IList<T> DeserializeToList<T>(string jsonString, IList<T> usersList)
+    {
+        var array = JArray.Parse(jsonString);
+
+        foreach (var item in array)
+        {
+            try
+            {
+                usersList.Add(item.ToObject<T>());
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.Message);
+            }
+        }
+
+        return usersList;
+    }
+
+    public async void UserPut(int index)
+    {
+        //jsonBody, ami elmegy a PUT-tal
+        using var www = UnityWebRequest.Put("http://127.0.0.1:8000/admin/users" + "/" + index, "");
+        www.SetRequestHeader("Content-Type", "application/json");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+    }
 }
