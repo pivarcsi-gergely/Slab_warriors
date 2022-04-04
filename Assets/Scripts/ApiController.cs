@@ -11,6 +11,9 @@ public class ApiController : MonoBehaviour
 {
     private readonly static string baseUrl = "http://127.0.0.1:8000/api/users";
     [SerializeField] Table table;
+    [SerializeField] Popup popup;
+    [SerializeField] PopupLogin popupLogin;
+    public string errorMessage;
 
 
     [ContextMenu("Test Get")]
@@ -95,8 +98,6 @@ public class ApiController : MonoBehaviour
             await Task.Yield();
         }
 
-        var jsonResponse = www.downloadHandler.text;
-
         if (www.result == UnityWebRequest.Result.Success)
         {
             Debug.Log($"Success: {www.downloadHandler.text}");
@@ -109,12 +110,7 @@ public class ApiController : MonoBehaviour
         
         try
         {
-            usersList = DeserializeToList<User>(jsonResponse, usersList);
-            table.UpdateContent();
-            foreach (var user in usersList)
-            {
-                Debug.Log(user.banned);
-            }
+            usersList = DeserializeToList(www.downloadHandler.text, usersList);
         }
         catch (Exception ex)
         {
@@ -142,16 +138,56 @@ public class ApiController : MonoBehaviour
         return usersList;
     }
 
-    public async void UserPut(int index)
+    public async void UserBan(int index)
     {
-        //jsonBody, ami elmegy a PUT-tal
-        using var www = UnityWebRequest.Put("http://127.0.0.1:8000/admin/users" + "/" + index, "");
-        www.SetRequestHeader("Content-Type", "application/json");
+        using var www = UnityWebRequest.Post(baseUrl + "/" + index + "/ban", index.ToString());
+        www.SetRequestHeader("Content-Type", "*/*");
         var operation = www.SendWebRequest();
 
         while (!operation.isDone)
         {
             await Task.Yield();
+        }
+    }
+
+    public async void UserUnban(int index)
+    {
+        using var www = UnityWebRequest.Post(baseUrl + "/" + index + "/unban", index.ToString());
+        www.SetRequestHeader("Content-Type", "*/*");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+    }
+
+    public async void UserLogin(string username, string password)
+    {
+        WWWForm LoginForm = new WWWForm();
+        LoginForm.AddField("username", username);
+        LoginForm.AddField("password", password);
+
+        using var www = UnityWebRequest.Post(baseUrl + "/login", LoginForm);
+        www.SetRequestHeader("Authorization", "Bearer");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Success: {www.downloadHandler.text}");
+            popupLogin.login();
+        }
+        else
+        {
+            var message = JsonConvert.DeserializeObject<LoginMessage>(www.downloadHandler.text);
+            popup.messageText.text = message.message;
+            Debug.Log(www.downloadHandler.text);
+            Debug.Log($"Failed: {errorMessage}");
         }
     }
 }

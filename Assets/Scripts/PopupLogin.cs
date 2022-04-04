@@ -1,24 +1,24 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
-using System;
 
 public class PopupLogin : MonoBehaviour
 {
+    [SerializeField] private ApiController controller;
     [SerializeField] private Popup Popup;
     [SerializeField] private TMP_InputField userInput;
     [SerializeField] private TMP_InputField passwordInput;
     [SerializeField] private GameObject CanvasPlay;
+    [SerializeField] private GameObject Admin_Button;
     private bool wrongUser = true;
     private bool wrongPwd = true;
+    public List<User> usersList = new List<User>();
 
     // Start is called before the first frame update
     void Start()
     {
         Popup.titleText.text = "Login to play";
-
+        controller.UsersGet(usersList);
     }
 
     public void inputCheck()
@@ -47,16 +47,35 @@ public class PopupLogin : MonoBehaviour
 
         if (!wrongPwd && !wrongUser)
         {
-            login();
+            controller.UserLogin(userInput.text, passwordInput.text);
         }
-
-
     }
 
-    private void login()
+    public void login()
     {
-        GameObject.Find("ApplyPopup").SetActive(false);
-        GameObject.Find("CanvasLogin").SetActive(false);
-        CanvasPlay.SetActive(true);
+        if (controller.errorMessage.Contains("404") || controller.errorMessage.Contains("Cannot connect"))
+        {
+            Popup.messageText.text = controller.errorMessage;
+        }
+        else
+        {
+            Popup.titleText.text = "Wow!";
+            Popup.messageText.text = "";
+            controller.errorMessage = "";
+            GameObject.Find("LoginPopup").SetActive(false);
+            GameObject.Find("CanvasLogin").SetActive(false);
+            User LoggedInUser = usersList.Find(user => user.username == userInput.text);
+            if (!LoggedInUser.admin)
+            {
+                Admin_Button.SetActive(false);
+            }
+            else
+            {
+                Admin_Button.SetActive(true);
+            }
+            userInput.text = "";
+            passwordInput.text = "";
+            CanvasPlay.SetActive(true);
+        }
     }
 }

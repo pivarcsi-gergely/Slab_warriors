@@ -1,34 +1,50 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityUITable;
 using TMPro;
 
 public class UserManager : MonoBehaviour
 {
     [SerializeField] ApiController controller;
-    [SerializeField] Button banConfirmButton;
-    [SerializeField] Button unbanConfirmButton;
+    [SerializeField] TMP_InputField input_userid;
     [SerializeField] Table table;
     [SerializeField] TextMeshProUGUI banTitleText;
     [SerializeField] TextMeshProUGUI banMessageText;
 
-    
-    public IList<User> usersList = new List<User>();
 
-    public void fillUsersList()
+    public List<User> usersList = new List<User>();
+
+    public void FillUsersList()
     {
         controller.UsersGet(usersList);
         table.UpdateContent();
+        usersList.Clear();
     }
 
-    public void banUser()
+    public void BanUserSetup()
     {
         banTitleText.text = "Ban User";
         banMessageText.text = "Put in the index of the User";
+        input_userid.Select();
+    }
 
+    public void BanUser()
+    {
+        if (banTitleText.text != "Ban User")
+        {
+            UnbanUser();
+        }
+        else
+        {
+            BanUserSetup();
+            if (usersList.Count <= 0)
+            {
 
+            }
+            controller.UserBan(int.Parse(input_userid.text));
+            FillUsersList();
+            FormReset();
+        }
         /*
          * Ezt egy button OnClick event-jével meghívjuk
          * Minden egyes meghívásnál elõjön egy pici form, ami kéri a sor indexét (természetesen Cancel button)
@@ -37,9 +53,25 @@ public class UserManager : MonoBehaviour
          */
     }
 
-    public void unbanUser()
+    public void UnbanUserSetup()
     {
         banTitleText.text = "Unban User";
         banMessageText.text = "Put in the index of the User";
+    }
+
+    public void UnbanUser()
+    {
+        UnbanUserSetup();
+
+        controller.UserUnban(int.Parse(input_userid.text));
+        FillUsersList();
+        FormReset();
+    }
+
+    public void FormReset()
+    {
+        banTitleText.text = "Hmm";
+        banMessageText.text = "Hmmmmmmmmmmmmmmmmmmmmmmmm";
+        input_userid.text = "";
     }
 }
