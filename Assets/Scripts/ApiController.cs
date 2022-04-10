@@ -9,7 +9,9 @@ using UnityUITable;
 
 public class ApiController : MonoBehaviour
 {
-    private readonly static string baseUrl = "http://127.0.0.1:8000/api/users";
+    private readonly static string baseUserUrl = "http://127.0.0.1:8000/api/users";
+    private readonly static string baseFighterUrl = "http://127.0.0.1:8000/api/fighters";
+    [SerializeField] FighterManager fighterManager;
     [SerializeField] Table table;
     [SerializeField] Popup popup;
     [SerializeField] PopupLogin popupLogin;
@@ -19,7 +21,7 @@ public class ApiController : MonoBehaviour
     [ContextMenu("Test Get")]
     public async void testGet()
     {
-        using var www = UnityWebRequest.Get(baseUrl + "/1");
+        using var www = UnityWebRequest.Get(baseUserUrl + "/1");
 
         www.SetRequestHeader("Content-Type", "application/json");
 
@@ -55,7 +57,7 @@ public class ApiController : MonoBehaviour
 
     public async void UserGet()
     {
-        using var www = UnityWebRequest.Get(baseUrl + "1");
+        using var www = UnityWebRequest.Get(baseUserUrl + "1");
         www.SetRequestHeader("Content-Type", "application/json");
         var operation = www.SendWebRequest();
 
@@ -89,7 +91,7 @@ public class ApiController : MonoBehaviour
     public async void UsersGet(IList<User> usersList)
     {
 
-        using var www = UnityWebRequest.Get(baseUrl);
+        using var www = UnityWebRequest.Get(baseUserUrl);
         www.SetRequestHeader("Content-Type", "application/json");
         var operation = www.SendWebRequest();
 
@@ -119,7 +121,7 @@ public class ApiController : MonoBehaviour
         }
     }
 
-    public static IList<T> DeserializeToList<T>(string jsonString, IList<T> usersList)
+    public static IList<T> DeserializeToList<T>(string jsonString, IList<T> list)
     {
         var array = JArray.Parse(jsonString);
 
@@ -127,7 +129,7 @@ public class ApiController : MonoBehaviour
         {
             try
             {
-                usersList.Add(item.ToObject<T>());
+                list.Add(item.ToObject<T>());
             }
             catch (Exception ex)
             {
@@ -135,12 +137,12 @@ public class ApiController : MonoBehaviour
             }
         }
 
-        return usersList;
+        return list;
     }
 
     public async void UserBan(int index)
     {
-        using var www = UnityWebRequest.Post(baseUrl + "/" + index + "/ban", index.ToString());
+        using var www = UnityWebRequest.Post(baseUserUrl + "/" + index + "/ban", index.ToString());
         www.SetRequestHeader("Content-Type", "*/*");
         var operation = www.SendWebRequest();
 
@@ -152,7 +154,7 @@ public class ApiController : MonoBehaviour
 
     public async void UserUnban(int index)
     {
-        using var www = UnityWebRequest.Post(baseUrl + "/" + index + "/unban", index.ToString());
+        using var www = UnityWebRequest.Post(baseUserUrl + "/" + index + "/unban", index.ToString());
         www.SetRequestHeader("Content-Type", "*/*");
         var operation = www.SendWebRequest();
 
@@ -168,7 +170,7 @@ public class ApiController : MonoBehaviour
         LoginForm.AddField("username", username);
         LoginForm.AddField("password", password);
 
-        using var www = UnityWebRequest.Post(baseUrl + "/login", LoginForm);
+        using var www = UnityWebRequest.Post(baseUserUrl + "/login", LoginForm);
         www.SetRequestHeader("Authorization", "Bearer");
         var operation = www.SendWebRequest();
 
@@ -188,6 +190,40 @@ public class ApiController : MonoBehaviour
             popup.messageText.text = message.message;
             Debug.Log(www.downloadHandler.text);
             Debug.Log($"Failed: {errorMessage}");
+        }
+    }
+
+    public async void FightersGet(IList<Fighter> fightersList)
+    {
+
+        using var www = UnityWebRequest.Get(baseFighterUrl);
+        www.SetRequestHeader("Content-Type", "application/json");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Success: {www.downloadHandler.text}");
+        }
+        else
+        {
+            Debug.Log(www.downloadHandler.text);
+            Debug.Log($"Failed: {www.error}");
+        }
+
+        try
+        {
+            fightersList = DeserializeToList(www.downloadHandler.text, fightersList);
+            fighterManager.FillDropdown();
+        }
+        catch (Exception ex)
+        {
+
+            Debug.LogError(ex.Message);
         }
     }
 }

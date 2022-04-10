@@ -59,9 +59,6 @@ public class PopupLogin : MonoBehaviour
         }
         else
         {
-            Popup.titleText.text = "Wow!";
-            Popup.messageText.text = "";
-            controller.errorMessage = "";
             GameObject.Find("LoginPopup").SetActive(false);
             GameObject.Find("CanvasLogin").SetActive(false);
             User LoggedInUser = usersList.Find(user => user.username == userInput.text);
@@ -73,9 +70,17 @@ public class PopupLogin : MonoBehaviour
             {
                 Admin_Button.SetActive(true);
             }
-            userInput.text = "";
-            passwordInput.text = "";
+            resetForm();
             CanvasPlay.SetActive(true);
         }
+    }
+
+    public void resetForm()
+    {
+        Popup.titleText.text = "Wow!";
+        Popup.messageText.text = "";
+        controller.errorMessage = "";
+        userInput.text = "";
+        passwordInput.text = "";
     }
 }

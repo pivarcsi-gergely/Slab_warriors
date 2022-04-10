@@ -1,22 +1,25 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System;
 
 public class MenuScript : MonoBehaviour
 {
-
     [Header("Volume settings")]
+    [SerializeField] private Slider VolumeSlider;
     [SerializeField] private TMP_Text volumeTextValue = null;
+    private float volumeValue;
 
     [Header("Graphics Settings")]
     Resolution[] resolutions;
-    public TMP_Dropdown resolutionDropdown;
+    Resolution _resolution;
+    [SerializeField] private TMP_Dropdown resolutionDropdown;
+    private int resolutionDropdownIndex;
+    [SerializeField] private TMP_Dropdown qualityDropdown;
     private int GQualLevel;
-    private bool isFullScreen;
+    [SerializeField] private Toggle FullScreenToggle;
+    private bool _isFullScreen;
 
     [Header("Brightness")]
     [SerializeField] private Slider BrightnessSlider = null;
@@ -46,14 +49,15 @@ public class MenuScript : MonoBehaviour
         resolutionDropdown.AddOptions(resolutionString);
         resolutionDropdown.value = currentRes;
         resolutionDropdown.RefreshShownValue();
-
     }
 
 
     public void setResolution(int resolutionIndex)
     {
-        Resolution resolution = resolutions[resolutionIndex];
-        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
+        resolutionDropdownIndex = resolutionIndex;
+        Resolution resolution = resolutions[resolutionDropdownIndex];
+        _resolution = resolution;
+        Screen.SetResolution(_resolution.width, _resolution.height, _isFullScreen);
     }
 
     public void setBrightness(float brightness)
@@ -70,27 +74,59 @@ public class MenuScript : MonoBehaviour
 
     public void setFullScreen(bool isFullscreen)
     {
-        isFullScreen = isFullscreen;
+        _isFullScreen = isFullscreen;
     }
 
     public void GraphicsApply()
     {
         PlayerPrefs.SetFloat("masterBrightness", BrightnessLevel);
+        Screen.brightness = PlayerPrefs.GetFloat("masterBrightness") * 100;
 
         PlayerPrefs.SetInt("masterQuality", GQualLevel);
         QualitySettings.SetQualityLevel(GQualLevel);
 
-        PlayerPrefs.SetInt("masterFullscreen", (isFullScreen ? 1 : 0));
+        PlayerPrefs.SetInt("masterFullscreen", _isFullScreen ? 1 : 0);
+        Screen.fullScreen = Convert.ToBoolean(PlayerPrefs.GetInt("masterFullscreen"));
+
+        PlayerPrefs.SetInt("masterResolutionIndex", resolutionDropdownIndex);
     }
 
     public void setVolume(float volume)
     {
-        AudioListener.volume = volume;
+        AudioListener.volume = volumeValue;
+        volumeValue = volume;
+        VolumeSlider.value = volume;
         volumeTextValue.text = volume.ToString("0") + "%";
     }
 
     public void volumeApply()
     {
-        PlayerPrefs.SetFloat("masterVolume", AudioListener.volume);
+        PlayerPrefs.SetFloat("masterVolume", volumeValue);
+        AudioListener.volume = PlayerPrefs.GetFloat("masterVolume");
+    }
+
+    public void resetSettings()
+    {
+        volumeValue = PlayerPrefs.GetFloat("masterVolume");
+        AudioListener.volume = volumeValue;
+        VolumeSlider.value = volumeValue;
+        volumeTextValue.text = volumeValue.ToString("0") + "%";
+
+        BrightnessLevel = PlayerPrefs.GetFloat("masterBrightness");
+        Debug.Log(BrightnessLevel);
+        BrightnessValueText.text = BrightnessLevel.ToString("0") + "%";
+        BrightnessSlider.value = BrightnessLevel;
+
+        GQualLevel = PlayerPrefs.GetInt("masterQuality");
+        qualityDropdown.value = GQualLevel;
+        
+        bool isFullScreen = Convert.ToBoolean(PlayerPrefs.GetInt("masterFullscreen"));
+        FullScreenToggle.SetIsOnWithoutNotify(isFullScreen);
+
+        resolutionDropdownIndex = PlayerPrefs.GetInt("masterResolutionIndex");
+        Resolution resolution = resolutions[resolutionDropdownIndex];
+        resolutionDropdown.value = resolutionDropdownIndex;
+        resolutionDropdown.RefreshShownValue();
+        Screen.SetResolution(resolution.width, resolution.height, isFullScreen);
     }
 }
