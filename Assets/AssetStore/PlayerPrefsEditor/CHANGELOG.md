@@ -4,8 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Planned]
-- Support new UIElements system
+## [1.2.0] - 2022-01-01
+### Added
+- Enhanced search field to filter player preferences by key or value
+- Add sorting functionality for Pref entries (none, asscending, descending)
+
+### Removed
+- Remove Unity 2017 support
+- Remove Unity 2018 support
+
+## [1.1.2] - 2021-07-01
+- Fixed ImageManger icon detection
 
 ## [1.1.1] - 2021-05-23
 - Add utf8 key encryption support for windows

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -9,6 +8,10 @@ public class FighterManager : MonoBehaviour
     [SerializeField] TMP_Dropdown fighterDropdown;
     public List<Fighter> fightersList = new List<Fighter>();
     Fighter selectedFighter;
+    public TextMeshPro fighterName, details, attack, hp;
+    public GameObject fighterImage;
+    public Material[] fighterMaterials;
+
 
     void Awake()
     {
@@ -25,6 +28,7 @@ public class FighterManager : MonoBehaviour
         }
         fighterDropdown.AddOptions(fighterString);
         fighterDropdown.RefreshShownValue();
+        selectedFighter = fightersList[0];
     }
 
     public void saveFighter(int FighterIndex)
@@ -32,4 +36,14 @@ public class FighterManager : MonoBehaviour
         selectedFighter = fightersList[FighterIndex];
         Debug.Log(selectedFighter.name);
     }
+
+    public void FillFighterSlot()
+    {
+        //fighterImage = ;
+        fighterName.text = selectedFighter.name;
+        details.text = selectedFighter.details;
+        hp.text = selectedFighter.hp.ToString();
+        attack.text = selectedFighter.attack.ToString();
+        
+}
 }

@@ -11,6 +11,7 @@ public class ApiController : MonoBehaviour
 {
     private readonly static string baseUserUrl = "http://127.0.0.1:8000/api/users";
     private readonly static string baseFighterUrl = "http://127.0.0.1:8000/api/fighters";
+    private readonly static string baseCardUrl = "http://127.0.0.1:8000/api/cards";
     [SerializeField] FighterManager fighterManager;
     [SerializeField] Table table;
     [SerializeField] Popup popup;
@@ -219,6 +220,39 @@ public class ApiController : MonoBehaviour
         {
             fightersList = DeserializeToList(www.downloadHandler.text, fightersList);
             fighterManager.FillDropdown();
+        }
+        catch (Exception ex)
+        {
+
+            Debug.LogError(ex.Message);
+        }
+    }
+
+    public async void CardsGet(IList<Card> cardsList)
+    {
+
+        using var www = UnityWebRequest.Get(baseCardUrl);
+        www.SetRequestHeader("Content-Type", "application/json");
+        var operation = www.SendWebRequest();
+
+        while (!operation.isDone)
+        {
+            await Task.Yield();
+        }
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log($"Success: {www.downloadHandler.text}");
+        }
+        else
+        {
+            Debug.Log(www.downloadHandler.text);
+            Debug.Log($"Failed: {www.error}");
+        }
+
+        try
+        {
+            cardsList = DeserializeToList(www.downloadHandler.text, cardsList);
         }
         catch (Exception ex)
         {
