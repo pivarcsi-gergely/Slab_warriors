@@ -39,11 +39,10 @@ public class FighterManager : MonoBehaviour
 
     public void FillFighterSlot()
     {
-        //fighterImage = ;
         fighterName.text = selectedFighter.name;
         details.text = selectedFighter.details;
         hp.text = selectedFighter.hp.ToString();
         attack.text = selectedFighter.attack.ToString();
-        
+        fighterImage.GetComponent<Renderer>().material = fighterMaterials[selectedFighter.id-1];
 }
 }
