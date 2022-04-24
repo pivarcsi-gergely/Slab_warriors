@@ -37,20 +37,10 @@ public class UserManager : MonoBehaviour
         else
         {
             BanUserSetup();
-            if (usersList.Count <= 0)
-            {
-
-            }
             controller.UserBan(int.Parse(input_userid.text));
             FillUsersList();
             FormReset();
         }
-        /*
-         * Ezt egy button OnClick event-jével meghívjuk
-         * Minden egyes meghívásnál elõjön egy pici form, ami kéri a sor indexét (természetesen Cancel button)
-         * Ezt el lehet menteni, amit tovább lehet küldeni az UserPut-nak, az pedig feldolgozza
-         * Ha ez megvan, újra lekérjük a content-et
-         */
     }
 
     public void UnbanUserSetup()
@@ -62,7 +52,6 @@ public class UserManager : MonoBehaviour
     public void UnbanUser()
     {
         UnbanUserSetup();
-
         controller.UserUnban(int.Parse(input_userid.text));
         FillUsersList();
         FormReset();

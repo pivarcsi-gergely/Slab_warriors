@@ -56,9 +56,9 @@ public class ApiController : MonoBehaviour
     }
 
 
-    public async void UserGet()
+    public async void UserGet(int id)
     {
-        using var www = UnityWebRequest.Get(baseUserUrl + "1");
+        using var www = UnityWebRequest.Get(baseUserUrl + "/" + id);
         www.SetRequestHeader("Content-Type", "application/json");
         var operation = www.SendWebRequest();
 

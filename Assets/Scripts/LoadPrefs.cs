@@ -46,7 +46,7 @@ public class LoadPrefs : MonoBehaviour
             }
 
 
-            if (PlayerPrefs.HasKey("masterFullscreen")) 
+            if (PlayerPrefs.HasKey("masterFullscreen"))
             {
                 int localFullscreen = PlayerPrefs.GetInt("masterFullscreen");
                 if (localFullscreen == 1)

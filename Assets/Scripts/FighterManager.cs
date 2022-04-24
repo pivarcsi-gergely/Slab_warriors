@@ -31,7 +31,7 @@ public class FighterManager : MonoBehaviour
         selectedFighter = fightersList[0];
     }
 
-    public void saveFighter(int FighterIndex)
+    public void SaveFighter(int FighterIndex)
     {
         selectedFighter = fightersList[FighterIndex];
         Debug.Log(selectedFighter.name);

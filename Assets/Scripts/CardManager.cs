@@ -22,27 +22,23 @@ public class CardManager : MonoBehaviour
     private GameObject _selected;
     private string SelectableTag = "Selectable";
 
-    private void Start()
-    {
-        goCardSlot = GameObject.Find("CardSlotBase");
-        goParent = GameObject.Find("CardSlotContainer");
-    }
-
     private void Awake()
     {
         apiController.CardsGet(cardsList);
         FillCards();
+        goCardSlot = GameObject.Find("CardSlotBase");
+        goParent = GameObject.Find("CardSlotContainer");
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
         if (Physics.Raycast(ray, out hit))
         {
-            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            _selected = hit.transform.gameObject;
-            Debug.Log(_selected.name);
-            GameObject go = Instantiate(_selected, cardSlots[index].transform.position, goCardSlot.transform.rotation, goParent.transform);
-            go.name = "CardSlot" + index;
+            if (Input.GetMouseButton(0))
+            {
+                ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                _selected = hit.transform.gameObject;
+            }
         }
     }
 
@@ -60,7 +56,7 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    /*public void OnDeckSlotClicked()
+    public void OnDeckSlotClicked()
     {
         if (PlacedDownCardsThisTurn == 3)
         {
@@ -72,8 +68,11 @@ public class CardManager : MonoBehaviour
             {
                 Debug.Log("Mouse's X index: " + Input.mousePosition.x);
                 Debug.Log("Mouse's Y index: " + Input.mousePosition.y);
+                Debug.Log(_selected.name);
                 if (hit.transform.gameObject.CompareTag(SelectableTag))
                 {
+                    GameObject go = Instantiate(_selected, cardSlots[index].transform.position, goCardSlot.transform.rotation, goParent.transform);
+                    go.name = "CardSlot" + index;
                     availableCardSlots[index] = false;
                     if (index >= 5)
                     {
@@ -90,9 +89,9 @@ public class CardManager : MonoBehaviour
                 }    
             }
         }
-        /*if (_selected != null)
+        if (_selected != null)
         {
             _selected = null;
         }
-    }*/
+    }
 }

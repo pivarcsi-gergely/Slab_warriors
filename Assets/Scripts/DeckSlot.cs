@@ -9,8 +9,12 @@ public class DeckSlot : MonoBehaviour
         cardManager = FindObjectOfType<CardManager>();
     }
 
-    private void OnMouseDown()
+    private void FixedUpdate()
     {
-        cardManager.Invoke("Update", 1.0f);
+        if (Input.GetMouseButtonDown(0))
+        {
+            cardManager.OnDeckSlotClicked();
+            //cardManager.Invoke("OnDeckSlotClicked", 3.0f);
+        }
     }
 }
